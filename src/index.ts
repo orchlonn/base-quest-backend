@@ -7,7 +7,6 @@ import { lessonsRouter } from "./routes/lessons";
 import { questionsRouter } from "./routes/questions";
 import { quizRouter } from "./routes/quiz";
 import { gameRouter } from "./routes/game";
-import { leaderboardRouter } from "./routes/leaderboard";
 import { achievementsRouter } from "./routes/achievements";
 
 const app = express();
@@ -23,7 +22,6 @@ app.use("/lessons", lessonsRouter);
 app.use("/questions", questionsRouter);
 app.use("/quiz", quizRouter);
 app.use("/game", gameRouter);
-app.use("/leaderboard", leaderboardRouter);
 app.use("/achievements", achievementsRouter);
 
 // Central error handler

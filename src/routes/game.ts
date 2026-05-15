@@ -51,13 +51,6 @@ gameRouter.post("/score", requireAuth, async (req: AuthRequest, res) => {
     },
   });
 
-  // Upsert leaderboard entry
-  await prisma.leaderboardEntry.upsert({
-    where: { userId_period: { userId, period: "ALL_TIME" } },
-    create: { userId, period: "ALL_TIME", totalXp: user.xp },
-    update: { totalXp: user.xp },
-  });
-
   // Award simple achievements
   await maybeAwardAchievements(userId, { mode, score, streakMax });
 

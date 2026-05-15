@@ -109,16 +109,6 @@ CREATE TABLE "ProgressEvent" (
 );
 
 -- CreateTable
-CREATE TABLE "LeaderboardEntry" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL,
-    "period" TEXT NOT NULL,
-    "totalXp" INTEGER NOT NULL DEFAULT 0,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "LeaderboardEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- CreateTable
 CREATE TABLE "Badge" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "code" TEXT NOT NULL,
@@ -146,9 +136,6 @@ CREATE UNIQUE INDEX "Achievement_code_key" ON "Achievement"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserAchievement_userId_achievementId_key" ON "UserAchievement"("userId", "achievementId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "LeaderboardEntry_userId_period_key" ON "LeaderboardEntry"("userId", "period");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Badge_code_key" ON "Badge"("code");

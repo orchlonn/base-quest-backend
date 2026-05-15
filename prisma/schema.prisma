@@ -1,0 +1,152 @@
+// BaseQuest Prisma schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  xp           Int      @default(0)
+  level        Int      @default(1)
+  streakDays   Int      @default(0)
+  lastActiveAt DateTime @default(now())
+  rankCode     String   @default("BEGINNER_BIT")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lessonProgress     LessonProgress[]
+  quizAttempts       QuizAttempt[]
+  gameScores         GameScore[]
+  achievements       UserAchievement[]
+  progressEvents     ProgressEvent[]
+  leaderboardEntries LeaderboardEntry[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  topic       String   // BINARY | DECIMAL | OCTAL | HEXADECIMAL | CONVERSION
+  description String
+  content     String   // markdown / rich text
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  progress LessonProgress[]
+}
+
+model LessonProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  lessonId   String
+  completed  Boolean  @default(false)
+  percent    Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  prompt      String
+  type        String   // MULTIPLE_CHOICE | INPUT
+  topic       String   // BINARY | HEX | OCTAL | DECIMAL | CONVERSION
+  difficulty  String   // EASY | MEDIUM | HARD
+  choices     String?  // JSON-encoded string[] for MULTIPLE_CHOICE
+  answer      String
+  poolKind    String   // PRE_TEST | POST_TEST | PRACTICE
+  explanation String?
+  createdAt   DateTime @default(now())
+}
+
+model QuizAttempt {
+  id            String   @id @default(cuid())
+  userId        String
+  kind          String   // PRE_TEST | POST_TEST
+  score         Int
+  totalItems    Int
+  correctCount  Int
+  topicBreakdown String  // JSON-encoded { binary: 0.8, hex: 0.5, ... }
+  takenAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GameScore {
+  id        String   @id @default(cuid())
+  userId    String
+  mode      String   // CONVERSION_CHALLENGE | TOWER_DEFENSE | MEMORY_MATCH | SPEED_QUIZ
+  score     Int
+  xpEarned  Int      @default(0)
+  streakMax Int      @default(0)
+  meta      String?  // JSON-encoded metadata
+  playedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  code        String   @unique // FIRST_WIN, STREAK_7, etc.
+  title       String
+  description String
+  iconKey     String   // for the frontend to pick an icon
+  xpReward    Int      @default(0)
+
+  users UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
+
+model ProgressEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String   // XP_GAIN | LEVEL_UP | LESSON_DONE | BADGE_EARNED
+  payload   String   // JSON-encoded
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LeaderboardEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  period    String   // ALL_TIME | WEEKLY
+  totalXp   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  title       String
+  description String
+  rankCode    String   // BEGINNER_BIT, BINARY_EXPLORER, HEX_HERO, CONVERSION_WIZARD
+  minXp       Int      @default(0)
+  iconKey     String
+}
